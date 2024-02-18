@@ -1,0 +1,16 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-user-side-nav></app-user-side-nav>
+<div class="container mt-4">
+    <div class="card">
+      <div class="card-header">
+        Twoje konto
+      </div>
+      <div class="card-body">
+        <h5 class="card-title"> {{ User?.userName }}</h5>
+        <p class="card-text">Imię: {{ User?.firstName }}</p>
+        <p class="card-text">Nazwisko: {{ User?.lastName }}</p>
+        <p class="card-text">Adres email: {{ User?.email }}</p>
+      </div>
+    </div>
+  </div>
+  </div>

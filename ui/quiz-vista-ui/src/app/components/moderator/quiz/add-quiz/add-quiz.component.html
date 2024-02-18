@@ -1,0 +1,48 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-moderator-side-nav></app-moderator-side-nav>
+    <div class="flex-grow-1">
+<div class="container mt-4">
+  <h2 class="text-center mb-4">Utwórz nowy quiz</h2>
+
+<div class="alert alert-danger" *ngIf="backendErrorMessages.length">
+    <li *ngFor="let message of backendErrorMessages">{{ message }}</li>
+</div>
+
+
+  <form (ngSubmit)="addQuiz()">
+    <div class="mb-3">
+      <label for="name" class="form-label">Nazwa</label>
+      <input type="text" class="form-control" id="name" [(ngModel)]="newQuiz.name" name="name" required>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Opis</label>
+      <textarea class="form-control" id="description" [(ngModel)]="newQuiz.description" name="description"></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="category" class="form-label">Kategoria</label>
+      <select class="form-control" id="category" [(ngModel)]="newQuiz.categoryId" name="categoryId" required>
+        <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="tags" class="form-label">Tagi</label>
+      <select multiple class="form-control" id="tags" [(ngModel)]="newQuiz.tagIds" name="tags">
+        <option *ngFor="let tag of tags" [value]="tag.id">{{ tag.name }}</option>
+      </select>
+    </div>
+    <div class="mb-3">
+        <label for="attemptCount" class="form-label">Maksymalna liczba prób</label>
+        <input type="number" class="form-control" id="attemptCount" [(ngModel)]="newQuiz.attemptCount" name="attemptCount" required>
+      </div>
+    <div class="mb-3 form-check">
+      <input type="checkbox" class="form-check-input" id="isActive" [(ngModel)]="newQuiz.isActive" name="isActive">
+      <label class="form-check-label" for="isActive">Aktywny</label>
+    </div>
+    <div class="mb-3 form-check">
+      <input type="checkbox" class="form-check-input" id="isPublic" [(ngModel)]="newQuiz.publicAccess" name="isPublic">
+      <label class="form-check-label" for="isPublic">Dostępny dla wszystkich</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Utwórz quiz</button>
+  </form>
+</div>
+</div></div>

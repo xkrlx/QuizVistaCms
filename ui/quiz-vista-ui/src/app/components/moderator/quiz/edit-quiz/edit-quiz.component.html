@@ -1,0 +1,92 @@
+<div class="d-flex flex-column flex-lg-row">
+  <app-moderator-side-nav></app-moderator-side-nav>
+  <div class="flex-grow-1">
+  <h1 class="text-center mb-4">Edytuj Quiz</h1>
+  <div *ngIf="updateSuccess" class="alert alert-success" role="alert">
+    Quiz został zaktualizowany
+</div>
+  <section class="card" *ngIf="quizDetails">
+    <header class="card-header">
+      <h1>{{ quizDetails.name }}</h1>  
+      <button *ngIf="!quizDetails.hasAttempts" [routerLink]="['/moderator/add-questions', quizDetails.name]" class="btn btn-primary">Edytuj pytania</button>
+      <button class="btn btn-danger" (click)="deleteQuiz()">Usuń quiz</button>
+    </header>
+  </section>  
+    <div class="alert alert-danger" *ngIf="backendErrorMessages.length">
+        <li *ngFor="let message of backendErrorMessages">{{ message }}</li>
+    </div>
+  
+    <form *ngIf="quizDetails" (ngSubmit)="editQuiz()">
+      <div class="mb-3">
+        <label for="name" class="form-label">Nazwa</label>
+        <input type="text" class="form-control" id="name" [(ngModel)]="quizDetails.name" name="name" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Opis</label>
+        <textarea class="form-control" id="description" [(ngModel)]="quizDetails.description" name="description"></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="category" class="form-label">Kategoria</label>
+        <select class="form-control" id="category" [(ngModel)]="quizDetails.categoryId" name="categoryId" required>
+          <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="tags" class="form-label">Tagi</label>
+        <select multiple class="form-control" id="tags" [(ngModel)]="quizDetails.tagIds" name="tags">
+            <option *ngFor="let tag of tags" [value]="tag.id">{{ tag.name }}</option>
+        </select>
+      </div>
+      <div class="mb-3">
+          <label for="attemptCount" class="form-label">Liczba prób</label>
+          <input type="number" class="form-control" id="attemptCount" [(ngModel)]="quizDetails.attemptCount" name="attemptCount" required>
+        </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="isActive" [(ngModel)]="quizDetails.isActive" name="isActive">
+        <label class="form-check-label" for="isActive">Aktywny</label>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="isPublic" [(ngModel)]="quizDetails.publicAccess" name="isPublic">
+        <label class="form-check-label" for="isPublic">Dostępny dla wszystkich</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+    </form>
+
+    <div style="height: 40px;"></div>
+    <div *ngIf="users && users.length">
+      <h3>Przypisani użytkownicy:</h3>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Imię</th>
+            <th scope="col">Nazwisko</th>
+            <th scope="col">Nazwa użytkownika</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users; let i = index">
+            <th scope="row">{{ i + 1 }}</th>
+            <td>{{ user.firstName }}</td>
+            <td>{{ user.lastName }}</td>
+            <td>{{ user.userName }}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" (click)="unAssignUser(quizDetails.name, user.userName)">Usuń</button>
+            </td>
+            
+          </tr>
+        </tbody>
+      </table>
+    </div>
+      <div class="row justify-content-start">
+        <div class="col-md-auto">
+          <input type="text" class="form-control" placeholder="Nazwa Użytkownika" [(ngModel)]="newUserName" name="userName">
+        </div>
+        <div class="col-md-auto">
+          <button class="btn btn-primary" (click)="assignUser(quizDetails.name, newUserName)">Przypisz Użytkownika</button>
+        </div>
+      </div>
+    <div style="height: 80px;"></div>
+  </div>
+  </div>

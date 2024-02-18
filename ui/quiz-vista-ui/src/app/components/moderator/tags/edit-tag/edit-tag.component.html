@@ -1,0 +1,32 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-moderator-side-nav></app-moderator-side-nav>
+    <div class="flex-grow-1">
+      <div *ngIf="tag">
+        <h2>Edytuj tag</h2>
+        <div *ngIf="updateSuccess" class="alert alert-success" role="alert">
+          Aktualizacja wykonana prawidłowo!
+        </div>
+        <div *ngIf="errors.length > 0" class="alert alert-danger" role="alert">
+          <ul>
+            <li *ngFor="let error of errors">{{ error }}</li>
+          </ul>
+        </div>
+  
+        <form class="col-md-7">
+          <div class="mb-3">
+            <label for="name" class="form-label">Nazwa tagu</label>
+            <input type="text" class="form-control" id="name" name="name" required [(ngModel)]="tag.name" #nameRef="ngModel">
+            <div *ngIf="nameRef.errors?.['required']" class="text-danger">
+              Nazwa tagu jest wymagana.
+            </div>
+          </div>
+  
+  
+          <button type="button" class="btn btn-primary" (click)="updateTag()">Aktualizuj</button>
+          <button type="button" class="btn btn-danger ms-2" (click)="deleteTag(tag.id)">Usuń</button>
+        </form>
+      </div>
+      <p *ngIf="!tag">Ładowanie danych tagu...</p>
+    </div>
+  </div>
+  

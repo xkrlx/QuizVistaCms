@@ -1,0 +1,32 @@
+version: '3.4'
+
+
+services:
+  quizvistaapi:
+    image: ${DOCKER_REGISTRY-}quizvistaapi
+    ports: 
+      - "50000:80"
+    build:
+      context: .
+      dockerfile: QuizVistaApi/Dockerfile
+
+  db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: sql_server2022
+    ports: 
+      - "1433:1433" 
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Qwert6.123
+    volumes:
+      - "./data/:/var/opt/mssql/data/"
+      - "./log/:/var/opt/mssql/log/"
+      - "./secrets/:/var/opt/mssql/secrets/"
+
+  angular:
+    image: angular
+    build: 
+      context: ../../ui/quiz-vista-ui/
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"

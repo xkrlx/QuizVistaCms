@@ -1,0 +1,32 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-moderator-side-nav></app-moderator-side-nav>
+    <div class="flex-grow-1">
+      <h2>Dodaj nową kategorię</h2>
+      <div *ngIf="createSuccess" class="alert alert-success" role="alert">
+        Kategoria została pomyślnie utworzona!
+      </div>
+      <div *ngIf="errors.length > 0" class="alert alert-danger" role="alert">
+        <ul>
+          <li *ngFor="let error of errors">{{ error }}</li>
+        </ul>
+      </div>
+  
+      <form class="col-md-7">
+        <div class="mb-3">
+          <label for="name" class="form-label">Nazwa kategorii</label>
+          <input type="text" class="form-control" id="name" name="name" required [(ngModel)]="category.name" #nameRef="ngModel">
+          <div *ngIf="nameRef.errors?.['required']" class="text-danger">
+            Nazwa kategorii jest wymagana.
+          </div>
+        </div>
+  
+        <div class="mb-3">
+          <label for="description" class="form-label">Opis</label>
+          <textarea class="form-control" id="description" name="description" rows="3" [(ngModel)]="category.description" #descriptionRef="ngModel"></textarea>
+        </div>
+  
+        <button type="button" class="btn btn-success" (click)="createCategory()">Utwórz</button>
+      </form>
+    </div>
+  </div>
+  

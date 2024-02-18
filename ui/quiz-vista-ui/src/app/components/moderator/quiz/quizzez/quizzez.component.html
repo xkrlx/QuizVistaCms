@@ -1,0 +1,48 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-moderator-side-nav *ngIf="IsUserLogged()"></app-moderator-side-nav>
+  
+    <div class="flex-grow-1">
+      <h2>Lista twoich quizów</h2>
+      <div class="d-flex mb-3">
+        <button type="button" class="btn btn-primary me-3" [routerLink]="['/moderator/add-quiz']">Utwórz nowy quiz</button>
+      </div>
+      <div *ngIf="quizzes && filteredQuizzes.length; else noDataTemplate">
+        
+        <div class="col-md-6">
+          <div class="d-flex mb-3">
+            <input type="text" class="form-control" placeholder="Wyszukaj quiz" [(ngModel)]="searchTerm" (ngModelChange)="filterQuizzez()">
+          </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+          <div class="col" *ngFor="let quiz of filteredQuizzes">
+            <div class="card h-100">
+              <div class="card-body">
+                <h3 class="card-title">{{ quiz.name }}</h3>
+                <p class="card-text">Opis: {{ quiz.description || 'No description provided.' }}</p>
+                <p class="card-text">Utworzony przez: {{ quiz.authorName }}</p>
+                <p class="card-text">
+                  <a class="badge bg-primary category-link">
+                    Kategoria: {{ quiz.categoryName }}
+                  </a>
+                </p>
+                <a [routerLink]="['/moderator/edit-quiz', quiz.name]" class="btn btn-primary">Edytuj quiz</a>
+                <a *ngIf="!quiz.hasAttempts" [routerLink]="['/moderator/add-questions', quiz.name]" class="btn btn-warning">Edytuj pytania</a>
+                <a *ngIf="quiz.hasAttempts" [routerLink]="['/moderator/quiz-results', quiz.name]" class="btn btn-warning">Pokaż wyniki</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ng-template #noDataTemplate>
+        <p>Nic nie znaleziono!</p>
+      </ng-template>
+
+      <div class="pagination-container">
+        <button class="btn btn-secondary" (click)="changePage(-1)" [disabled]="currentPage === 1">Poprzednia</button>
+        <span>Strona {{currentPage}}</span>
+        <button class="btn btn-secondary" (click)="changePage(1)" [disabled]="currentPage * itemsPerPage >= quizzes.length">Następna</button>
+      </div>
+
+    </div>
+  </div>
+  

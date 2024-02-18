@@ -1,0 +1,74 @@
+.card {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+  
+  .card-title {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+  }
+  
+  .card-text {
+    margin-bottom: 5px;
+  }
+  
+  .tags {
+    margin-top: 10px;
+  }
+  
+  .badge {
+    margin-right: 5px;
+    padding: 5px 8px;
+    text-decoration: none;
+    color: #fff;
+  }
+  
+  .badge.bg-primary {
+    background-color: #007bff;
+  }
+  
+  .badge.bg-secondary {
+    background-color: #6c757d;
+  }
+  
+  .badge.bg-primary:hover,
+  .badge.bg-secondary:hover {
+    opacity: 0.8;
+  }
+  
+  .tag-link,
+  .category-link {
+    text-decoration: none;
+  }
+  
+  .stretched-link {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    word-wrap: break-word;
+  }
+  /* Stylizacja dodatkowa */
+.card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+  padding: 20px;
+}

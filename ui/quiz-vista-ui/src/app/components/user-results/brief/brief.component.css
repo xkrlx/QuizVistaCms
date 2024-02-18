@@ -1,0 +1,15 @@
+.answers-correct{
+    color: #007914;
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+.answers-wrong{
+    color: #830000;
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+.answers-mixed{
+    color: #97720d;
+    font-weight: 600;
+    font-size: 1.3rem;
+}

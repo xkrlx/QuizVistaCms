@@ -1,0 +1,8 @@
+.link-style {
+    transition: color 0.3s ease; /* Dodaje płynne przejście */
+  }
+  
+  .link-style:hover {
+    color: #fff;
+    text-decoration: none; /* Usunięcie podkreślenia podczas najechania */
+  }

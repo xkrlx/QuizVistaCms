@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-end">
+    <div class="container-fluid">
+        <div class="navbar-collapse" id="leftNavbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item" *ngIf="IsUserLogged()">
+                    <a href="#" class="nav-link" routerLinkActive="active" routerLink="quizez">Lista quizów</a>
+                </li>
+                <li class="nav-item" *ngIf="IsUserLogged()">
+                    <a href="#" class="nav-link" routerLinkActive="active" routerLink="results">Wyniki</a>
+                </li>
+                
+            </ul>
+        </div>
+
+        <div class="navbar-collapse justify-content-end" id="rightNavbar">
+            <ul class="navbar-nav">
+                <li class="nav-item" *ngIf="!IsUserLogged()">
+                    <a class="nav-link" routerLink="login" routerLinkActive="active" >Zaloguj</a>
+                </li>
+                <li class="nav-item" *ngIf="!IsUserLogged()">
+                    <a class="nav-link"  routerLink="register" routerLinkActive="active">Zarejestruj</a>
+                </li>
+                <li class="nav-item" *ngIf="IsUserLogged() && IsModerator()">
+                    <a class="nav-link" routerLink="moderator" routerLinkActive="active">Moderator</a>
+                </li>
+                <li class="nav-item" *ngIf="IsUserLogged() && IsAdmin()">
+                    <a class="nav-link" routerLink="admin" routerLinkActive="active">Admin</a>
+                </li>
+                <li class="nav-item" *ngIf="IsUserLogged()">
+                    <a class="nav-link" routerLink="user-details" routerLinkActive="active">Zarządzanie kontem</a>
+                </li>
+                <li class="nav-item" *ngIf="IsUserLogged()">
+                    <a class="nav-link" href="#" (click)="Logout()">Wyloguj</a>
+                </li>
+            </ul>
+            
+        </div>
+
+
+    </div>
+</nav>

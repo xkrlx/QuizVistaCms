@@ -1,0 +1,25 @@
+<aside class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px;">
+  <div class="mb-3">
+    <h3>Kategorie:</h3>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <li class="nav-item" *ngFor="let category of categories">
+        <a [routerLink]="['/quizez/category', category]" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <svg class="bi me-2" width="16" height="16"></svg>
+          {{ category }}
+        </a>
+      </li>
+    </ul>
+  </div>
+  <hr>
+  <div class="mb-3">
+    <h3>Tagi:</h3>
+    <ul class="nav nav-pills flex-column mb-auto">
+      <div *ngFor="let tag of tags" class="nav-item" [ngStyle]="{ 'font-size': calculateTagFontSize(tag) + 'px' }">
+        <a [routerLink]="['/quizez/tag', tag]" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <svg class="bi me-2" width="16" height="16"></svg>
+          {{ tag }}
+        </a>
+      </div>
+    </ul>
+  </div>
+</aside>

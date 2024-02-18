@@ -1,0 +1,23 @@
+.sidebar {
+    width: 250px; /* Dowolna szerokość sidebaru */
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+  
+  .category-list ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .category-list li {
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+  
+  .tag-list div {
+    display: inline-block;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+  

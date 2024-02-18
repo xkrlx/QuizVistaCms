@@ -1,0 +1,40 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-admin-side-nav></app-admin-side-nav>
+    <div class="flex-grow-1">
+      <div class="user-list-container">
+        <h2 class="text-center">Lista Użytkowników</h2>
+        <div class="col-md-5">
+          <input type="text" class="form-control mb-3" placeholder="Wyszukaj użytkownika" [(ngModel)]="searchTerm" (ngModelChange)="filterUsers()">
+          </div>
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nazwa Użytkownika</th>
+                <th scope="col">Imię</th>
+                <th scope="col">Nazwisko</th>
+                <th scope="col">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of filteredUsers; index as i">
+                    <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+                    <td>
+                      <a [routerLink]="['/admin/edit-user', user.id]">{{ user.userName }}</a>
+                    </td>
+                    <td>{{user.firstName}}</td>
+                    <td>{{user.lastName}}</td>
+                    <td>{{user.email}}</td>
+                </tr>
+            </tbody>
+            </table>
+
+            <div class="pagination-container">
+              <button class="btn btn-secondary" (click)="changePage(-1)" [disabled]="currentPage === 1">Poprzednia</button>
+              <span>Strona {{currentPage}}</span>
+              <button class="btn btn-secondary" (click)="changePage(1)" [disabled]="currentPage * itemsPerPage >= users.length">Następna</button>
+            </div>
+      </div>
+    </div>
+  </div>
+  

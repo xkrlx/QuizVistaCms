@@ -1,0 +1,73 @@
+<div class="d-flex flex-column flex-lg-row">
+  <app-admin-side-nav></app-admin-side-nav>
+  <div class="flex-grow-1">
+    <div *ngIf="user">
+      <h2>Edytuj użytkownika</h2>
+      <div *ngIf="updateSuccess" class="alert alert-success" role="alert">
+        Aktualizacja wykonana prawidłowo!
+      </div>
+      <div *ngIf="errors.length > 0" class="alert alert-danger" role="alert">
+        <ul>
+          <li *ngFor="let error of errors">{{ error }}</li>
+        </ul>
+      </div>
+
+      <form class="col-md-7">
+        <div class="mb-3">
+          <label for="username" class="form-label">Nazwa użytkownika</label>
+          <input type="text" class="form-control" id="username" name="username" minlength="3" maxlength="30" required [(ngModel)]="user.userName" #userNameRef="ngModel">
+          <div *ngIf="userNameRef.errors?.['required']" class="text-danger">
+            Nazwa użytkownika jest wymagana
+          </div>
+          <div *ngIf="userNameRef.errors?.['minlength']">
+            Nazwa musi składać się z co najmniej 3 znaków.
+          </div>
+          <div *ngIf="userNameRef.errors?.['maxlength']">
+            Nazwa nie może być dłuższa niż 30 znaków.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="firstName" class="form-label">Imię</label>
+          <input type="text" class="form-control" id="firstName" name="firstName" [(ngModel)]="user.firstName" maxlength="50" required #firstNameRef="ngModel">
+
+          <div *ngIf="firstNameRef.errors?.['required']" class="text-danger">
+            Imię jest wymagane
+          </div>
+          <div *ngIf="firstNameRef.errors?.['maxlength']">
+            Imię nie może być dłuższe niż 50 znaków.
+          </div>
+
+        </div>
+        <div class="mb-3">
+          <label for="lastName" class="form-label">Nazwisko</label>
+          <input type="text" class="form-control" id="lastName" name="lastName" [(ngModel)]="user.lastName" maxlength="50" required #lastNameRef="ngModel">
+
+          <div *ngIf="lastNameRef.errors?.['required']" class="text-danger">
+            Nazwa użytkownika jest wymagana
+          </div>
+          <div *ngIf="lastNameRef.errors?.['maxlength']">
+            Nazwisko nie może być dłuższe niż 50 znaków.
+          </div>
+
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" [(ngModel)]="user.email" required email maxlength="80" #emailRef="ngModel">
+
+          <div *ngIf="emailRef.errors?.['required']" class="text-danger">
+            Nazwa użytkownika jest wymagana
+          </div>
+          <div *ngIf="emailRef.errors?.['email']" class="text-danger">
+            Wprowadź prawidłowy adres email.
+          </div>
+          <div *ngIf="emailRef.errors?.['maxlength']">
+            Email nie może być dłuższy niż 80 znaków.
+          </div>
+
+        </div>
+        <button type="button" class="btn btn-primary" (click)="updateUser()">Zapisz</button>
+      </form>
+    </div>
+    <p *ngIf="!user">Ładowanie danych użytkoników...</p>
+  </div>
+</div>

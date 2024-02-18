@@ -1,0 +1,63 @@
+<div class="d-flex flex-column flex-lg-row">
+  <app-side-nav *ngIf="IsUserLogged()"></app-side-nav>
+
+  
+  <div class="flex-grow-1">
+    <div *ngIf="categoryName || tagName" class="my-4">
+      <div class="card">
+        <div class="card-body">
+          <p *ngIf="categoryName" class="card-text">Kategoria: {{ categoryName }}</p>
+          <p *ngIf="tagName" class="card-text">Tag: {{ tagName }}</p>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="filteredQuizzes && filteredQuizzes.length; else noDataTemplate">
+      <h2>Dostępne quizy</h2>
+
+      <div class="col-md-6">
+        <div class="d-flex mb-3">
+          <input type="text" class="form-control" placeholder="Wyszukaj quiz" [(ngModel)]="searchTerm" (ngModelChange)="filterQuizzez()">
+        </div>
+      </div>
+
+      <div *ngIf="message" class="alert alert-success">
+        {{ message }}
+      </div>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="col" *ngFor="let quiz of filteredQuizzes">
+          <div class="card h-30">
+            <div class="card-body">
+              <h3 class="card-title">{{ quiz.name }}</h3>
+              <p class="card-text">Opis: {{ quiz.description || 'Brak opisu.' }}</p>
+              <p class="card-text">Utworzone przez: {{ quiz.authorName }}</p>
+              <div class="tags">
+                <span *ngFor="let tag of quiz.tags">
+                  <a [routerLink]="['/quizez/tag', tag.name]" class="badge bg-secondary tag-link">
+                    {{ tag.name }}
+                  </a>
+                </span>
+              </div>
+              <p class="card-text">
+                <a [routerLink]="['/quizez/category', quiz.categoryName]" class="badge bg-primary category-link">
+                  Kategoria: {{ quiz.categoryName }}
+                </a>
+              </p>
+              <a [routerLink]="['/quiz-details', quiz.name]" class="stretched-link">Pokaż</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noDataTemplate>
+      <p>Brak dostępnych quizów.</p>
+    </ng-template>
+    <br/>
+    <div class="pagination-container">
+      <button class="btn btn-secondary" (click)="changePage(-1)" [disabled]="currentPage === 1">Poprzednia</button>
+      <span>Strona {{currentPage}}</span>
+      <button class="btn btn-secondary" (click)="changePage(1)" [disabled]="currentPage * itemsPerPage >= quizzes.length">Następna</button>
+    </div>
+  </div>
+
+
+</div>

@@ -1,0 +1,40 @@
+<form class="container mt-4" (ngSubmit)="onSubmit()" #quizForm="ngForm">
+  <div *ngFor="let question of quizData.model.questions" class="mb-4">
+    <h3>
+      {{ question.text }}
+      <span class="points">
+        <span *ngIf="question.additionalValue > 0" class="positive-points"> (+{{ question.additionalValue }}) </span>
+        <span *ngIf="question.substractionalValue !== null" class="negative-points"> (-{{ question.substractionalValue }}) </span>
+      </span>
+    </h3>
+    <div *ngIf="question.type === '1' || question.type === '2'; else multiSelect">
+      <div *ngFor="let answer of question.answers" class="form-check">
+        <input
+          class="form-check-input"
+          type="radio"
+          [value]="answer.id"
+          [name]="'question-' + question.id"
+          [(ngModel)]="selectedAnswers[question.id]"
+          (ngModelChange)="checkFormValidity()"
+          required
+        />
+        <label class="form-check-label"  [for]="'question-' + question.id + '-' + answer.id">{{ answer.text }}</label>
+      </div>
+    </div>
+    <ng-template #multiSelect>
+      <div *ngFor="let answer of question.answers" class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          [value]="answer.id"
+          [name]="'question-' + question.id"
+          [(ngModel)]="selectedAnswers[question.id + '-' + answer.id]"
+          (ngModelChange)="checkFormValidity()"
+        />
+        <label class="form-check-label"  [for]="'question-' + question.id + '-' + answer.id">{{ answer.text }}</label>
+      </div>
+    </ng-template>
+    <hr />
+  </div>
+  <button type="submit" class="btn btn-primary" [disabled]="quizForm.invalid || isFormInvalid">Wyślij odpowiedzi</button>
+</form>

@@ -1,0 +1,72 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-admin-side-nav></app-admin-side-nav>
+    <div class="flex-grow-1">
+      <div class="user-list-container">
+        <h2 class="text-center">Role użytkowników</h2>
+        <div class="col-md-5">
+        <input type="text" class="form-control mb-3" placeholder="Wyszukaj użytkownika" [(ngModel)]="searchTerm" (ngModelChange)="filterUsers()">
+        </div>
+        <div *ngIf="updateSuccess" class="alert alert-success" role="alert">
+          Zmiana roli zapisana.
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nazwa Użytkownika</th>
+                <th scope="col">Użytkownik</th>
+                <th scope="col">Moderator</th>
+                <th scope="col">Administrator</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of filteredUsers; index as i">
+                    <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+                    <td>{{user.userName}}</td>
+                    <td (click)="toggleRole(user.userName, 'User')">
+                      <ng-container *ngIf="hasRole(user.roles, 'User'); else noRoleImage">
+                          <img src="assets\icons\yes.png" alt="Yes">
+                      </ng-container>
+                      <ng-template #noRoleImage>
+                          <img src="assets\icons\no.png" alt="No">
+                      </ng-template>
+                  </td>
+                    <td (click)="toggleRole(user.userName, 'Moderator')">
+                      <ng-container *ngIf="hasRole(user.roles, 'Moderator'); else noRoleImage">
+                          <img src="assets\icons\yes.png" alt="Yes">
+                      </ng-container>
+                      <ng-template #noRoleImage>
+                          <img src="assets\icons\no.png" alt="No">
+                      </ng-template>
+                  </td>
+
+                    <td (click)="toggleRole(user.userName, 'Admin')">
+                      <ng-container *ngIf="hasRole(user.roles, 'Admin'); else noRoleImage">
+                          <img src="assets\icons\yes.png" alt="Yes">
+                      </ng-container>
+                      <ng-template #noRoleImage>
+                          <img src="assets\icons\no.png" alt="No">
+                      </ng-template>
+                  </td>
+                  
+                  
+
+                </tr>
+            </tbody>
+            </table>
+            
+
+            <div class="pagination-container">
+              <button class="btn btn-secondary" (click)="changePage(-1)" [disabled]="currentPage === 1">Poprzednia</button>
+              <span>Strona {{currentPage}}</span>
+              <button class="btn btn-secondary" (click)="changePage(1)" [disabled]="currentPage * itemsPerPage >= users.length">Następna</button>
+            </div>
+            
+            <p class="text-center mt-3">
+                Aby dokonane zmiany w pełni zaczęły obowiązywać, zalecane jest ponowne zalogowanie się użytkownika.
+            </p>
+      </div>
+    </div>
+  </div>
+  

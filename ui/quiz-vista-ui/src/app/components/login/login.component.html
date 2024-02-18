@@ -1,0 +1,68 @@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header"><h3 class="text-center font-weight-light my-4">Logowanie</h3></div>
+                <div class="card-body">
+                    <div *ngIf="backendErrorMessage" class="alert alert-danger">
+                        {{ backendErrorMessage }}
+                    </div>
+
+                    <form (ngSubmit)="onSubmit(loginForm)" #loginForm="ngForm">
+                        <div class="form-group">
+                            <label class="small mb-1" for="username">Nazwa użytkownika</label>
+                            <input class="form-control py-4" id="username" type="text" 
+                                   placeholder="Wpisz nazwę użytkownika" 
+                                   [(ngModel)]="loginData.userName" 
+                                   name="userName" 
+                                   minlength="3" 
+                                   maxlength="30" 
+                                   required 
+                                   #userNameRef="ngModel"/>
+                                   <div *ngIf="userNameRef.errors && (loginForm.submitted || userNameRef.dirty || userNameRef.touched)" class="text-danger">
+                                    <div *ngIf="userNameRef.errors['required']">
+                                        Nazwa użytkownika jest wymagana.
+                                    </div>
+                                    <div *ngIf="userNameRef.errors['minlength']">
+                                        Nazwa musi składać się z co najmniej 3 znaków.
+                                    </div>
+                                    <div *ngIf="userNameRef.errors['maxlength']">
+                                        Nazwa nie może być dłuższa niż 30 znaków.
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="small mb-1" for="password">Hasło</label>
+                            <input class="form-control py-4" id="password" type="password" 
+                                   placeholder="Wpisz hasło" 
+                                   [(ngModel)]="loginData.password" 
+                                   name="password" 
+                                   required 
+                                   minlength="6" 
+                                   maxlength="100" 
+                                   #passwordRef="ngModel"/>
+                                   <div *ngIf="passwordRef.errors && (loginForm.submitted || passwordRef.dirty || passwordRef.touched)" class="text-danger">
+                                    <div *ngIf="passwordRef.errors['required']">
+                                        Hasło jest wymagane.
+                                    </div>
+                                    <div *ngIf="passwordRef.errors['minlength']">
+                                        Hasło musi składać się z co najmniej 6 znaków.
+                                    </div>
+                                    <div *ngIf="passwordRef.errors['maxlength']">
+                                        Hasło nie może być dłuższe niż 100 znaków.
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0">
+                            <a class="small" routerLink="/forgot-password">Zapomniałeś hasła?</a>
+                            <button type="submit" class="btn btn-primary">Zaloguj się</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <div class="small"><a routerLink="/register">Nie masz konta? Zarejestruj się!</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

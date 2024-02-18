@@ -1,0 +1,25 @@
+<div class="container mt-4">
+    <section class="card">
+      <header class="card-header">
+        <h1>{{ quizDetails.name }}</h1>
+        <p>{{ quizDetails.description }}</p>
+      </header>
+      <div class="card-body">
+        <article>
+          <p><strong>Kategoria: </strong> <a [routerLink]="['/quizez/category', quizDetails.categoryName]" class="badge bg-primary text-decoration-none link-style">{{ quizDetails.categoryName }}</a></p>
+          <p><strong>Autor:</strong> {{ quizDetails.authorName }}</p>
+          <p><strong>Liczba prób:</strong> {{ quizDetails.userAttempts }}</p>
+          <p><strong>Limit prób:</strong> {{ quizDetails.attemptsLimit }}</p>
+          <p><strong>Tagi: </strong></p>
+          <span *ngFor="let tag of quizDetails.tags" class="badge bg-secondary me-2">
+            <a [routerLink]="['/quiz-details', quizDetails.name]" class="text-decoration-none text-white link-style">{{ tag.name }}</a>
+          </span>
+          
+        </article>
+      </div>
+      <footer class="card-footer">
+        <a *ngIf="quizDetails.userAttempts < quizDetails.attemptsLimit" [routerLink]="['/quiz-run', quizDetails.name]"  class="btn btn-primary">Rozpocznij</a>
+        <p *ngIf="quizDetails.userAttempts >= quizDetails.attemptsLimit" class="text-danger">Osiągnąłeś limit prób w tym quizie.</p>
+      </footer>
+    </section>
+  </div>

@@ -1,0 +1,36 @@
+<div class="d-flex flex-column flex-lg-row">
+    <app-moderator-side-nav></app-moderator-side-nav>
+    <div class="flex-grow-1">
+      <div *ngIf="category">
+        <h2>Edytuj kategorię</h2>
+        <div *ngIf="updateSuccess" class="alert alert-success" role="alert">
+          Aktualizacja wykonana prawidłowo!
+        </div>
+        <div *ngIf="backendErrorMessages.length" class="alert alert-danger" role="alert">
+          <ul>
+            <li *ngFor="let message of backendErrorMessages">{{ message }}</li>
+          </ul>
+        </div>
+  
+        <form class="col-md-7">
+          <div class="mb-3">
+            <label for="name" class="form-label">Nazwa kategorii</label>
+            <input type="text" class="form-control" id="name" name="name" required [(ngModel)]="category.name" #nameRef="ngModel">
+            <div *ngIf="nameRef.errors?.['required']" class="text-danger">
+              Nazwa kategorii jest wymagana.
+            </div>
+          </div>
+  
+          <div class="mb-3">
+            <label for="description" class="form-label">Opis</label>
+            <textarea class="form-control" id="description" name="description" rows="3" [(ngModel)]="category.description" #descriptionRef="ngModel"></textarea>
+          </div>
+  
+          <button type="button" class="btn btn-primary" (click)="updateCategory()">Aktualizuj</button>
+          <button type="button" class="btn btn-danger ms-2" (click)="deleteCategory(category.id)">Usuń</button>
+        </form>
+      </div>
+      <p *ngIf="!category">Ładowanie danych kategorii...</p>
+    </div>
+  </div>
+  

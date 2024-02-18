@@ -1,0 +1,27 @@
+version: '3.4'
+
+networks:
+    myAppNetwork:  
+
+services:
+  quizvistaapi:
+    image: ${DOCKER_REGISTRY-}quizvistaapi
+    ports: 
+      - "50000:50000"
+    build:
+      context: ./services/QuizVistaApi/QuizVistaApi
+      dockerfile: ./Dockerfile
+
+  db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: sql_server2022
+    ports: 
+      - "1433:1433" 
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Qwert6.123
+    volumes:
+      - "./data/:/var/opt/mssql/data/"
+      - "./log/:/var/opt/mssql/log/"
+      - "./secrets/:/var/opt/mssql/secrets/"
+
