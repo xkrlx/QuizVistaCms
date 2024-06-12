@@ -21,7 +21,28 @@ export class AddQuestionsComponent {
   questionsToDelete: string[] = [];
   answersToDelete: string[]=[];
   newAnswers: Answer[]=[];
-  
+  quizData = [
+    {
+      pytanie: "pytanie1",
+      odpowiedzi: {
+        a: "odpowiedz1",
+        b: "odpowiedz2",
+        c: "odpowiedz3",
+        d: "odpowiedz4"
+      },
+      poprawnaOdpowiedz: "a"
+    },
+    {
+      pytanie: "pytanie2",
+      odpowiedzi: {
+        a: "odpowiedz1",
+        b: "odpowiedz2",
+        c: "odpowiedz3",
+        d: "odpowiedz4"
+      },
+      poprawnaOdpowiedz: "c"
+    }
+  ];
 
 
   constructor(private route: ActivatedRoute,private quizHttpService: QuizHttpService, private questionHttpService: QuestionHttpService, private answerHttpService: AnswertHttpService,private router: Router) { }
@@ -255,5 +276,28 @@ onAnswerChange(question: Question, changedAnswerIndex: number) {
     });
   }
 }
+
+generateQuiz(): void {
+  this.questions = this.quizData.map(q => ({
+    id: 0, // Domyślny id dla nowego pytania
+    quizId: 0, // Domyślny quizId, można dostosować w zależności od implementacji
+    text: q.pytanie,
+    type: '1', // Domyślny typ pytania (można dostosować)
+    cmsTitleStyle: '', // Domyślny styl tytułu CMS, można dostosować
+    cmsQuestionsStyle: '', // Domyślny styl pytań CMS, można dostosować
+    answers: Object.entries(q.odpowiedzi).map(([key, value]) => ({
+      id: 0, // Domyślny id dla nowej odpowiedzi
+      questionId: 0, // Domyślny questionId, można dostosować
+      answerText: value,
+      isCorrect: key === q.poprawnaOdpowiedz
+    })),
+    additionalValue: 1, // Można dostosować
+    substractionalValue: 0 // Można dostosować
+  }));
+}
+
+
+
+
 
 }
