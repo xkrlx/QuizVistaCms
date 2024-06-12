@@ -1,3 +1,3 @@
 export class ApiConfig{
-    static url: string = "https://quizvista.karolm.pl:8111/api"
+    static url: string = "https://localhost:7136/api"
 }

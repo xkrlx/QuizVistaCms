@@ -2,6 +2,7 @@
     <section class="card" *ngIf="quizDetails">
       <header class="card-header">
         <h1>{{ quizDetails.name }}</h1>  <button class="btn btn-danger me-2 mb-4" (click)="deleteQuiz()">Usuń quiz</button>
+        <button class="btn btn-primary mb-4" (click)="generateQuiz()">Wygeneruj quiz</button>
         <p>{{ quizDetails.description }}</p>
       </header>
     </section>
