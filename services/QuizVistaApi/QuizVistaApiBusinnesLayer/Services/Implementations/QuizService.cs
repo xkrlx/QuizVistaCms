@@ -17,9 +17,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Net.Http.Json;
 
 namespace QuizVistaApiBusinnesLayer.Services.Implementations
 {
@@ -628,95 +631,158 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
         }
 
-        //Method to genereate quiz via ChatGPT API
         public async Task<ResultWithModel<QuizGenerateResponse>> GenerateQuizAsync(QuizGenerateRequest quizToGenerate)
         {
             var token = _configuration.GetSection("ChatGPTApiSettings:Token").Value;
-            //  OpenAPI REQUEST
 
-            //HARDCODED DATA
-            var generatedQuiz = new QuizGenerateResponse
+            using (var httpClient = new HttpClient())
             {
-                Category = "Animals",
-                NumberOfQuestions = 10,
-                Questions = new List<GeneratedQuestion>
-            {
-                    new GeneratedQuestion
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var prompt = GeneratePrompt(quizToGenerate);
+                Console.WriteLine("Wygenerowany prompt: " + prompt);
+
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo", 
+                    messages = new[]
                     {
-                        QuestionText = "Which of these animals is a mammal?",
-                        Answers = new List<string> { "Crocodile", "Whale", "Lizard", "Penguin" },
-                        CorrectAnswer = "Whale"
-                    },
-                    new GeneratedQuestion
+                new { role = "system", content = "You are a helpful assistant." },
+                new { role = "user", content = prompt }
+            },
+                    max_tokens = 1500, 
+                    temperature = 0.7 
+                };
+
+                var response = await httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", requestBody);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<OpenAIResponse>();
+
+                    if (result != null && result.choices != null && result.choices.Count > 0)
                     {
-                        QuestionText = "Which animal is the largest in the world?",
-                        Answers = new List<string> { "African Elephant", "Blue Whale", "Whale Shark", "Polar Bear" },
-                        CorrectAnswer = "Blue Whale"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals is a bird?",
-                        Answers = new List<string> { "Orca", "Dolphin", "Pelican", "Koala" },
-                        CorrectAnswer = "Pelican"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals is venomous?",
-                        Answers = new List<string> { "Sea Turtle", "Tree Frog", "Scorpion", "Orangutan" },
-                        CorrectAnswer = "Scorpion"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals is the fastest on land?",
-                        Answers = new List<string> { "Cheetah", "Lion", "Antelope", "Zebra" },
-                        CorrectAnswer = "Cheetah"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals lives the longest?",
-                        Answers = new List<string> { "Parrot", "Giant Tortoise", "Rabbit", "Elephant" },
-                        CorrectAnswer = "Giant Tortoise"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals is an invertebrate?",
-                        Answers = new List<string> { "Jellyfish", "Penguin", "Shark", "Elephant" },
-                        CorrectAnswer = "Jellyfish"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals has the most teeth?",
-                        Answers = new List<string> { "Shark", "Crocodile", "Dolphin", "Hippopotamus" },
-                        CorrectAnswer = "Shark"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals is a predator?",
-                        Answers = new List<string> { "Koala", "Kangaroo", "Tiger", "Zebra" },
-                        CorrectAnswer = "Tiger"
-                    },
-                    new GeneratedQuestion
-                    {
-                        QuestionText = "Which of these animals can fly?",
-                        Answers = new List<string> { "Penguin", "Ostrich", "Sparrow", "Chicken" },
-                        CorrectAnswer = "Sparrow"
+                        var generatedQuiz = ParseOpenAIResponse(result);
+                        if (generatedQuiz != null)
+                        {
+                            return ResultWithModel<QuizGenerateResponse>.Ok(generatedQuiz);
+                        }
                     }
-            }
-            };
-            // -------------
+                }
 
-            var jsonGenQuiz = JsonSerializer.Serialize(generatedQuiz);
-            var convertedGenQuiz = JsonSerializer.Deserialize<QuizGenerateResponse>(jsonGenQuiz);
-            if (convertedGenQuiz is null)
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.Error.WriteLine("Błąd podczas zapytania do OpenAI: " + errorContent);
+            }
+
+            return ResultWithModel<QuizGenerateResponse>.Ok(new QuizGenerateResponse
             {
-                return ResultWithModel<QuizGenerateResponse>.Ok(new QuizGenerateResponse()
+                Category = "NoCategory",
+                NumberOfQuestions = 0,
+                Questions = new List<GeneratedQuestion>()
+            });
+        }
+
+        private string GeneratePrompt(QuizGenerateRequest quizToGenerate)
+        {
+            return $@"
+Generate a quiz in the category {quizToGenerate.CategoryName} with {quizToGenerate.QuestionsAmount} questions. Each question should have {quizToGenerate.AnswersAmount} possible answers. Format the response as JSON in the following structure:
+{{
+  ""model"": {{
+    ""category"": ""{quizToGenerate.CategoryName}"",
+    ""numberOfQuestions"": {quizToGenerate.QuestionsAmount},
+    ""questions"": [
+      {{
+        ""questionText"": ""<questionText>"",
+        ""answers"": [
+          ""<answer1>"",
+          ""<answer2>"",
+          ""<answer3>"",
+          ""<answer4>""
+        ],
+        ""correctAnswer"": ""<correctAnswer>""
+      }}
+      // more questions...
+    ]
+  }},
+  ""isValid"": true,
+  ""errorMessage"": """"
+}}
+Make sure the JSON is properly formatted.";
+        }
+
+        private QuizGenerateResponse ParseOpenAIResponse(OpenAIResponse response)
+        {
+            try
+            {
+                var responseContent = response.choices[0].message.content.Trim();
+                Console.WriteLine("Odpowiedź OpenAI: " + responseContent);
+
+                // Niestandardowy deserializator
+                var jsonDocument = JsonDocument.Parse(responseContent);
+                var modelElement = jsonDocument.RootElement.GetProperty("model");
+
+                var category = modelElement.GetProperty("category").GetString();
+                var numberOfQuestions = modelElement.GetProperty("numberOfQuestions").GetInt32();
+
+                var questions = new List<GeneratedQuestion>();
+                foreach (var questionElement in modelElement.GetProperty("questions").EnumerateArray())
+                {
+                    var questionText = questionElement.GetProperty("questionText").GetString();
+                    var correctAnswer = questionElement.GetProperty("correctAnswer").GetString();
+
+                    var answers = new List<string>();
+                    foreach (var answerElement in questionElement.GetProperty("answers").EnumerateArray())
+                    {
+                        answers.Add(answerElement.GetString());
+                    }
+
+                    questions.Add(new GeneratedQuestion
+                    {
+                        QuestionText = questionText,
+                        Answers = answers,
+                        CorrectAnswer = correctAnswer
+                    });
+                }
+
+                return new QuizGenerateResponse
+                {
+                    Category = category,
+                    NumberOfQuestions = numberOfQuestions,
+                    Questions = questions
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Błąd podczas przetwarzania odpowiedzi OpenAI: " + ex.Message);
+                return new QuizGenerateResponse
                 {
                     Category = "NoCategory",
                     NumberOfQuestions = 0,
                     Questions = new List<GeneratedQuestion>()
-                });
+                };
             }
-            return ResultWithModel<QuizGenerateResponse>.Ok(convertedGenQuiz);
         }
+
+
+
+
+        public class OpenAIResponse
+        {
+            public List<Choice> choices { get; set; }
+        }
+
+        public class Choice
+        {
+            public Message message { get; set; }
+        }
+
+        public class Message
+        {
+            public string role { get; set; }
+            public string content { get; set; }
+        }
+
+
+
     }
 }

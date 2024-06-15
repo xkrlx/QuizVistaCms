@@ -1,31 +1,32 @@
 <div class="container mt-4">
-    <section class="card" *ngIf="quizDetails">
-      <header class="card-header">
-        <h1>{{ quizDetails.name }}</h1>  <button class="btn btn-danger me-2 mb-4" (click)="deleteQuiz()">Usuń quiz</button>
-        <p>{{ quizDetails.description }}</p>
-      </header>
-    </section>
+  <section class="card" *ngIf="quizDetails">
+    <header class="card-header">
+      <h1>{{ quizDetails.name }}</h1>
+      <button class="btn btn-danger me-2 mb-4" (click)="deleteQuiz()">Usuń quiz</button>
+      <p>{{ quizDetails.description }}</p>
+    </header>
+  </section>
 
-    <form #quizForm="ngForm">
-      <div>
-        <label for="category">Category</label>
-        <input type="text" id="category" required [(ngModel)]="category" name="category" #categoryInput="ngModel">
-      </div>
-      <div>
-        <label for="questionsAmount">Questions Amount</label>
-        <input type="number" id="questionsAmount" required [(ngModel)]="questionsAmount" name="questionsAmount" #questionsAmountInput="ngModel">
-      </div>
-      <div>
-        <label for="answersAmount">Answers Amount</label>
-        <input type="number" id="answersAmount" required [(ngModel)]="answersAmount" name="answersAmount" #answersAmountInput="ngModel">
-      </div>
-      <button type="button" (click)="onSubmit()" [disabled]="!quizForm.form.valid">Submit</button>
-    </form>
+  <form #quizForm="ngForm">
+    <div class="mb-3">
+      <label for="category" class="form-label">Podaj temat quizu</label>
+      <input type="text" id="category" class="form-control" required [(ngModel)]="category" name="category" #categoryInput="ngModel">
+    </div>
+    <div class="mb-3">
+      <label for="questionsAmount" class="form-label">Liczba pytań</label>
+      <input type="number" id="questionsAmount" class="form-control" required [(ngModel)]="questionsAmount" name="questionsAmount" #questionsAmountInput="ngModel">
+    </div>
+    <div class="mb-3">
+      <label for="answersAmount" class="form-label">Liczba odpowiedzi</label>
+      <input type="number" id="answersAmount" class="form-control" required [(ngModel)]="answersAmount" name="answersAmount" #answersAmountInput="ngModel">
+    </div>
+    <button type="button" class="btn btn-primary" (click)="generateQuiz()" [disabled]="!quizForm.form.valid">Generuj Quiz</button>
+  </form>
 
-  <form class="container mt-4" #quizForm="ngForm">
+  <form class="container mt-4" #questionsForm="ngForm">
     <div *ngFor="let question of questions; let i = index" class="mb-4">
       <div class="mb-3">
-        <img class="float-right" src="assets\icons\clear24.png" (click)="deleteQuestion(i); $event.preventDefault()">
+        <img class="float-right" src="assets/icons/clear24.png" (click)="deleteQuestion(i); $event.preventDefault()">
         <label for="questionText-{{i}}" class="form-label fw-bold">Pytanie {{i+1}}</label>
         <input type="text" class="form-control" id="questionText-{{i}}" [(ngModel)]="question.text" name="questionText-{{i}}" required>
       </div>
@@ -40,7 +41,7 @@
         </div>
       </div>
       <div class="mb-3">
-        <label for="questionType-{{i}}" class="form-label" (change)="editQuestion(question)">Typ pytania</label>
+        <label for="questionType-{{i}}" class="form-label">Typ pytania</label>
         <select class="form-control" id="questionType-{{i}}" [(ngModel)]="question.type" name="questionType-{{i}}" (change)="onQuestionTypeChange(question, i)" required>
           <option value="" disabled selected>Rodzaj pytania</option>
           <option value="1">Jedna odpowiedź dobra</option>
@@ -49,7 +50,7 @@
         </select>
       </div>
       <div *ngFor="let answer of question.answers; let j = index" class="mb-2">
-        <img class="float-right" src="assets\icons\clear24.png" (click)="deleteAnswer(question,j)" *ngIf="questions[i].answers.length > 2">
+        <img class="float-right" src="assets/icons/clear24.png" (click)="deleteAnswer(question, j)" *ngIf="questions[i].answers.length > 2">
         <label for="answerText-{{i}}-{{j}}" class="form-label">Odpowiedź {{j + 1}}</label>
         <input type="text" class="form-control" id="answerText-{{i}}-{{j}}" [(ngModel)]="answer.answerText" name="answerText-{{i}}-{{j}}" required>
         <div class="form-check">
@@ -62,8 +63,7 @@
     </div>
     <button class="btn btn-outline-success me-2 mb-4" (click)="addQuestion(); $event.preventDefault()">Dodaj pytanie</button>
     <div class="d-flex justify-content-start">
-        <button type="button" class="btn btn-primary mb-4" [disabled]="quizForm.invalid" [disabled]="!isFormValid()" (click)="onSubmit()">Zapisz</button>
+      <button type="button" class="btn btn-primary mb-4" [disabled]="!questionsForm.form.valid || !isFormValid()" (click)="onSubmit()">Zapisz</button>
     </div>
-    
   </form>
 </div>
