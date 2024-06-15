@@ -147,5 +147,13 @@ namespace QuizVistaApi.Controllers
         }
 
 
+        [HttpPost("evaluateanswer")]
+        public async Task<ResultWithModel<QuizOpenQuestionResponse>> EvaluteAnswer([FromBody] QuizOpenQuestionRequest quizOpenQuestionRequest)
+        {
+            //var userId = User.FindFirst(ClaimTypes.Name)?.Value ?? "";
+
+            return await _quizService.EvaluateAnswer(quizOpenQuestionRequest);
+        }
+
     }
 }

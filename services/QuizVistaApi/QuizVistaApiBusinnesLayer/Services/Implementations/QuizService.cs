@@ -782,7 +782,71 @@ Make sure the JSON is properly formatted.";
             public string content { get; set; }
         }
 
+        public async Task<ResultWithModel<QuizOpenQuestionResponse>> EvaluateAnswer(QuizOpenQuestionRequest quizOpenQuestionRequest)
+        {
+            var token = _configuration.GetSection("ChatGPTApiSettings:Token").Value;
 
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = new[]
+                    {
+                        new { role = "system", content = "You are a helpful assistant." },
+                        new {
+                            role = "user",
+                            content = $@"Answer in polish. Evaluate the following answer for correctness and score it from 1 to 5. 
+Please return the evaluation in the following JSON format:
+{{
+    ""Score"": <score from 1 to 5>,
+    ""Description"": ""<short description explaining the evaluation>""
+}}
+Question: {quizOpenQuestionRequest.QuestionText}
+Answer: {quizOpenQuestionRequest.UserAnswer}"
+                        }
+                    },
+                    max_tokens = 1500,
+                    temperature = 0.7
+                };
+
+                var response = await httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", requestBody);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine(result);
+                    try
+                    {
+                        var openAiResponse = JsonSerializer.Deserialize<OpenAIResponse>(result);
+
+                        if (openAiResponse != null && openAiResponse.choices != null && openAiResponse.choices.Count > 0)
+                        {
+                            var content = openAiResponse.choices[0].message.content;
+                            var parsedResponse = JsonSerializer.Deserialize<QuizOpenQuestionResponse>(content);
+
+                            if (parsedResponse != null)
+                            {
+                                return ResultWithModel<QuizOpenQuestionResponse>.Ok(parsedResponse);
+                            }
+                        }
+
+                        return ResultWithModel<QuizOpenQuestionResponse>.Failed("Failed to parse the evaluation response.");
+                    }
+                    catch (JsonException jsonEx)
+                    {
+                        Console.Error.WriteLine("JSON Parsing Error: " + jsonEx.Message);
+                        Console.Error.WriteLine("Response Content: " + result);
+                        return ResultWithModel<QuizOpenQuestionResponse>.Failed("JSON Parsing Error: " + jsonEx.Message);
+                    }
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.Error.WriteLine("Błąd podczas zapytania do OpenAI: " + errorContent);
+                return ResultWithModel<QuizOpenQuestionResponse>.Failed("Request to OpenAI failed.");
+            }
+        }
     }
 }
