@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Question } from 'src/app/models/question';
 import { Answer } from 'src/app/models/answer';
@@ -12,7 +12,7 @@ import { GenQuiz } from 'src/app/models/genQuiz';
   templateUrl: './add-questions.component.html',
   styleUrls: ['./add-questions.component.css']
 })
-export class AddQuestionsComponent {
+export class AddQuestionsComponent implements OnInit {
   questions: Question[] = [];
   quizName: string = '';
   quizDetails: any;
@@ -37,10 +37,9 @@ export class AddQuestionsComponent {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.quizName = params.get('quizName') ?? '';
+      this.getQuizDetails(this.quizName);
+      this.getQuestionsForQuiz(this.quizName);
     });
-
-    this.getQuizDetails(this.quizName);
-    this.getQuestionsForQuiz(this.quizName);
   }
 
   onSubmit() {
@@ -142,6 +141,7 @@ export class AddQuestionsComponent {
   getQuizDetails(quizName: string) {
     this.quizHttpService.getQuizDetails(quizName).subscribe(res => {
       this.quizDetails = res.model;
+      console.log('Quiz details:', this.quizDetails);
     });
   }
 
@@ -194,6 +194,7 @@ export class AddQuestionsComponent {
   getQuestionsForQuiz(quizName: string) {
     this.quizHttpService.getQuizModQuestions(quizName).subscribe(res => {
       this.quizWithQuestions = res.model;
+      console.log('Quiz with questions:', this.quizWithQuestions);
 
       if (this.quizWithQuestions && this.quizWithQuestions.questions) {
         this.questions = this.quizWithQuestions.questions.map((question: any) => {
@@ -257,25 +258,25 @@ export class AddQuestionsComponent {
       QuestionsAmount: this.questionsAmount,
       AnswersAmount: this.answersAmount
     };
-
+  
     this.quizHttpService.generateQuiz(genQuiz).subscribe(
       response => {
         if (response && response.model && response.model.questions) {
           this.questions = response.model.questions.map((q: any) => ({
-            id: 0,
-            quizId: 0,
+            id: 0, 
+            quizId: 0, 
             text: q.questionText,
-            type: '1',
-            cmsTitleStyle: '',
-            cmsQuestionsStyle: '',
+            type: '1', 
+            cmsTitleStyle: '', 
+            cmsQuestionsStyle: '', 
             answers: q.answers.map((answer: string, index: number) => ({
-              id: 0,
-              questionId: 0,
+              id: 0, 
+              questionId: 0, 
               answerText: answer,
               isCorrect: answer === q.correctAnswer
             })),
-            additionalValue: 1,
-            substractionalValue: 0
+            additionalValue: 1, 
+            substractionalValue: 0 
           }));
         } else {
           console.error('Nieprawidłowa odpowiedź z API:', response);

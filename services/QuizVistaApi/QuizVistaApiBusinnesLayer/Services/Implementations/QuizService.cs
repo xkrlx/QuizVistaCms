@@ -56,7 +56,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
         {
             var entity = quizToCreate.ToEntity();
 
-            var user = await _userRepository.GetAll().Where(x=>x.UserName == userId).FirstOrDefaultAsync();
+            var user = await _userRepository.GetAll().Where(x => x.UserName == userId).FirstOrDefaultAsync();
 
             if (user == null)
             {
@@ -73,7 +73,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 return Result.Failed("Nazwa quizu jest zajęta");
             }
 
-            
+
 
             entity.AuthorId = user.Id;
 
@@ -99,9 +99,9 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
         public async Task<Result> DeleteQuizAsync(string userName, int idToDelete)
         {
             var quiz = await _quizRepository.GetAll()
-                .Include(q => q.Tags) 
-                .Include(q=>q.Questions)
-                .Include(q=>q.Users)
+                .Include(q => q.Tags)
+                .Include(q => q.Questions)
+                .Include(q => q.Users)
                 .Where(x => x.Id == idToDelete)
                 .FirstOrDefaultAsync();
 
@@ -138,7 +138,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
         {
             var quiz = await _quizRepository.GetAsync(id);
 
-            if(quiz is null)
+            if (quiz is null)
                 throw new ArgumentNullException($"quiz #{id} not found");
 
             return ResultWithModel<QuizResponse>.Ok(quiz.ToResponse());
@@ -149,10 +149,10 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             var quizes = await _quizRepository
                 .GetAll()
                 //.Include(x=>x.Author)
-                .OrderBy(x=>x.Id)
+                .OrderBy(x => x.Id)
                 .ToListAsync();
 
-            if(quizes is null)
+            if (quizes is null)
                 throw new ArgumentNullException(nameof(quizes));
 
             var quizesResponses = quizes.ToCollectionResponse().ToList();
@@ -166,15 +166,15 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             var quiz = await _quizRepository.GetAll()
                 .Include(x => x.Author)
                 .Include(x => x.Questions)
-                .FirstOrDefaultAsync( x=> x.Name == quizName);
+                .FirstOrDefaultAsync(x => x.Name == quizName);
 
             if (quiz is null)
                 throw new ArgumentNullException($"quiz {quizName} not found");
 
-            foreach(var question in quiz.Questions)
+            foreach (var question in quiz.Questions)
             {
                 List<Answer> answers = await _answerRepository.GetAll()
-                    .Where(x=>x.QuestionId == question.Id)
+                    .Where(x => x.QuestionId == question.Id)
                     .ToListAsync();
 
                 question.Answers = answers;
@@ -193,7 +193,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 AuthorName = quiz.Author is null ? "" : $"{quiz.Author.FirstName} {quiz.Author.LastName}",
                 Name = quizName,
                 UserAttemptCount = attemptCount?.AttemptCountNumber ?? 0,
-                Questions = quiz.Questions.Select(x=>new QuizRun.QuestionRun
+                Questions = quiz.Questions.Select(x => new QuizRun.QuestionRun
                 {
                     Id = x.Id,
                     Text = x.Text,
@@ -202,13 +202,13 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                     CmsTitleValue = x.CmsTitleStyle,
                     CmsQuestionsValue = x.CmsQuestionsStyle,
                     Type = x.Type,
-                    Answers = x.Answers.Select(y=>new QuizRun.QuestionRun.AnswerRun
+                    Answers = x.Answers.Select(y => new QuizRun.QuestionRun.AnswerRun
                     {
                         Id = y.Id,
                         Text = y.AnswerText
                     }).ToList()
-                    
-                    
+
+
                 }).ToList()
             };
 
@@ -325,7 +325,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
         public async Task<Result> AssignUser(AssignUserRequest assignUserRequest)
         {
-            var quiz = await _quizRepository.GetAll().Include(x=>x.Users).Where(x=>x.Name==assignUserRequest.QuizName).FirstOrDefaultAsync();
+            var quiz = await _quizRepository.GetAll().Include(x => x.Users).Where(x => x.Name == assignUserRequest.QuizName).FirstOrDefaultAsync();
             if (quiz == null)
             {
                 return Result.Failed("Quiz not found.");
@@ -340,7 +340,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
             //var x = quiz.Users.Where(x=>x.Id==user.Id).FirstOrDefault();
 
-            if (quiz.Users.Any(x=>x.Id==user.Id))
+            if (quiz.Users.Any(x => x.Id == user.Id))
             {
                 return Result.Failed("User is already assigned to this quiz.");
             }
@@ -382,10 +382,10 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             if (loggedUser is null) throw new Exception($"user {userName} cannot find");
 
             List<Quiz> quizes = await _quizRepository.GetAll()
-                .Include(x=>x.Users)
-                .Include(x=>x.Category)
-                .Include(x=>x.Author)
-                .Include(x=>x.Tags)
+                .Include(x => x.Users)
+                .Include(x => x.Category)
+                .Include(x => x.Author)
+                .Include(x => x.Tags)
                 .Include(x => x.Questions)
                 .ToListAsync();
 
@@ -393,7 +393,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             IEnumerable<Quiz> quizesAssignedToUser = quizes
                 .Where(x => (x.PublicAccess == true) || x.Users.Any(y => y.Id == loggedUser.Id))
                 .Where(x => x.IsActive)
-                .Where(x=>x.Questions.Any())
+                .Where(x => x.Questions.Any())
                 .ToList();
 
             IList<QuizListForUserResponse> quizesResponse = quizesAssignedToUser.Select(x => new QuizListForUserResponse
@@ -403,7 +403,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 Description = x.Description ?? "",
                 AuthorName = $"{x.Author.FirstName} {x.Author.LastName}",
                 CategoryName = x.Category.Name,
-                Tags = x.Tags.Select(y=>new TagResponse
+                Tags = x.Tags.Select(y => new TagResponse
                 {
                     Id = y.Id,
                     Name = y.Name,
@@ -425,7 +425,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 .Include(x => x.Category)
                 .Include(x => x.Author)
                 .Include(x => x.Tags)
-                .Where(x=>x.Category.Name.ToLower() == categoryName.ToLower())
+                .Where(x => x.Category.Name.ToLower() == categoryName.ToLower())
                 .ToListAsync();
 
             //add public quizes
@@ -500,10 +500,10 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 .Include(x => x.Category)
                 .Include(x => x.Author)
                 .Include(x => x.Tags)
-                .Include(x=>x.Questions)
-                .ThenInclude(x=>x.Answers)
-                .ThenInclude(x=>x.Attempts)
-                .Where(x=>x.AuthorId==loggedUser.Id)
+                .Include(x => x.Questions)
+                .ThenInclude(x => x.Answers)
+                .ThenInclude(x => x.Attempts)
+                .Where(x => x.AuthorId == loggedUser.Id)
                 .ToListAsync();
 
 
@@ -545,8 +545,8 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 .FirstOrDefaultAsync(x => x.UserName == userName);
 
             if (user is null) throw new ArgumentException($"user does not exist");
-            
-            var attemptCount = await _attemptCountRepository.GetAll().FirstOrDefaultAsync(x=>x.UserId == user.Id && x.QuizId == quiz.Id);
+
+            var attemptCount = await _attemptCountRepository.GetAll().FirstOrDefaultAsync(x => x.UserId == user.Id && x.QuizId == quiz.Id);
 
 
             QuizDetailsForUser quizDetails = new QuizDetailsForUser
@@ -644,14 +644,14 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
                 var requestBody = new
                 {
-                    model = "gpt-3.5-turbo", 
+                    model = "gpt-3.5-turbo",
                     messages = new[]
                     {
                 new { role = "system", content = "You are a helpful assistant." },
                 new { role = "user", content = prompt }
             },
-                    max_tokens = 1500, 
-                    temperature = 0.7 
+                    max_tokens = 1500,
+                    temperature = 0.7
                 };
 
                 var response = await httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", requestBody);
