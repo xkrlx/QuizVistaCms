@@ -16,6 +16,8 @@ namespace QuizVistaApiBusinnesLayer.Services.Interfaces
         Task<ResultWithModel<IEnumerable<QuizResponse>>> GetQuizesAsync();
         Task<ResultWithModel<QuizResponse>> GetQuizAsync(int id);
         Task<Result>  CreateQuizAsync(string userId,QuizRequest quizToCreate);
+        Task<ResultWithModel<QuizGenerateResponse>> GenerateQuizAsync(QuizGenerateRequest quizToGenerate);
+        Task<ResultWithModel<QuizOpenQuestionResponse>> EvaluateAnswer(QuizOpenQuestionRequest quizOpenQuestionRequest);
         Task<Result> DeleteQuizAsync(string username,int idToDelete);
         Task<Result> UpdateQuizAsync(string userId,QuizRequest quizToUpdate);
         Task<Result> AssignUser(AssignUserRequest assignUserRequest);
@@ -33,5 +35,6 @@ namespace QuizVistaApiBusinnesLayer.Services.Interfaces
         Task<ResultWithModel<QuizWithQuestionsModResponse>> GetQuestionsForQuizMod(string quizName, string userName);
         Task<ResultWithModel<IEnumerable<QuizListForUserResponse>>> GetQuizesByCategory(string userName, string categoryName);
         Task<ResultWithModel<IEnumerable<QuizListForUserResponse>>> GetQuizesByTag(string userName, string tagName);
+        
     }
 }

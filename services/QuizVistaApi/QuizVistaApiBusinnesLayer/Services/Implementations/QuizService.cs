@@ -1,6 +1,7 @@
 ﻿using Azure.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using QuizVistaApiBusinnesLayer.Extensions;
 using QuizVistaApiBusinnesLayer.Extensions.Mappings;
@@ -16,8 +17,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using System.Net.Http.Json;
 
 namespace QuizVistaApiBusinnesLayer.Services.Implementations
 {
@@ -29,12 +34,14 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
         private readonly IRepository<Attempt> _attemptRepository;
         private readonly IRepository<Answer> _answerRepository;
         private readonly IRepository<AttemptCount> _attemptCountRepository;
+        private readonly IConfiguration _configuration;
         public QuizService(IRepository<Quiz> quizRepository,
             IRepository<User> userRepository,
             IRepository<Tag> tagRepository,
             IRepository<Attempt> attemptRepository,
             IRepository<Answer> answerRepository,
-            IRepository<AttemptCount> attemptCountRepository)
+            IRepository<AttemptCount> attemptCountRepository,
+            IConfiguration configuration)
         {
             _quizRepository = quizRepository;
             _userRepository = userRepository;
@@ -42,13 +49,14 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             _attemptRepository = attemptRepository;
             _answerRepository = answerRepository;
             _attemptCountRepository = attemptCountRepository;
+            _configuration = configuration;
         }
 
         public async Task<Result> CreateQuizAsync(string userId, QuizRequest quizToCreate)
         {
             var entity = quizToCreate.ToEntity();
 
-            var user = await _userRepository.GetAll().Where(x=>x.UserName == userId).FirstOrDefaultAsync();
+            var user = await _userRepository.GetAll().Where(x => x.UserName == userId).FirstOrDefaultAsync();
 
             if (user == null)
             {
@@ -65,7 +73,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 return Result.Failed("Nazwa quizu jest zajęta");
             }
 
-            
+
 
             entity.AuthorId = user.Id;
 
@@ -91,9 +99,9 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
         public async Task<Result> DeleteQuizAsync(string userName, int idToDelete)
         {
             var quiz = await _quizRepository.GetAll()
-                .Include(q => q.Tags) 
-                .Include(q=>q.Questions)
-                .Include(q=>q.Users)
+                .Include(q => q.Tags)
+                .Include(q => q.Questions)
+                .Include(q => q.Users)
                 .Where(x => x.Id == idToDelete)
                 .FirstOrDefaultAsync();
 
@@ -130,7 +138,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
         {
             var quiz = await _quizRepository.GetAsync(id);
 
-            if(quiz is null)
+            if (quiz is null)
                 throw new ArgumentNullException($"quiz #{id} not found");
 
             return ResultWithModel<QuizResponse>.Ok(quiz.ToResponse());
@@ -141,10 +149,10 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             var quizes = await _quizRepository
                 .GetAll()
                 //.Include(x=>x.Author)
-                .OrderBy(x=>x.Id)
+                .OrderBy(x => x.Id)
                 .ToListAsync();
 
-            if(quizes is null)
+            if (quizes is null)
                 throw new ArgumentNullException(nameof(quizes));
 
             var quizesResponses = quizes.ToCollectionResponse().ToList();
@@ -158,15 +166,15 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             var quiz = await _quizRepository.GetAll()
                 .Include(x => x.Author)
                 .Include(x => x.Questions)
-                .FirstOrDefaultAsync( x=> x.Name == quizName);
+                .FirstOrDefaultAsync(x => x.Name == quizName);
 
             if (quiz is null)
                 throw new ArgumentNullException($"quiz {quizName} not found");
 
-            foreach(var question in quiz.Questions)
+            foreach (var question in quiz.Questions)
             {
                 List<Answer> answers = await _answerRepository.GetAll()
-                    .Where(x=>x.QuestionId == question.Id)
+                    .Where(x => x.QuestionId == question.Id)
                     .ToListAsync();
 
                 question.Answers = answers;
@@ -185,7 +193,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 AuthorName = quiz.Author is null ? "" : $"{quiz.Author.FirstName} {quiz.Author.LastName}",
                 Name = quizName,
                 UserAttemptCount = attemptCount?.AttemptCountNumber ?? 0,
-                Questions = quiz.Questions.Select(x=>new QuizRun.QuestionRun
+                Questions = quiz.Questions.Select(x => new QuizRun.QuestionRun
                 {
                     Id = x.Id,
                     Text = x.Text,
@@ -194,13 +202,13 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                     CmsTitleValue = x.CmsTitleStyle,
                     CmsQuestionsValue = x.CmsQuestionsStyle,
                     Type = x.Type,
-                    Answers = x.Answers.Select(y=>new QuizRun.QuestionRun.AnswerRun
+                    Answers = x.Answers.Select(y => new QuizRun.QuestionRun.AnswerRun
                     {
                         Id = y.Id,
                         Text = y.AnswerText
                     }).ToList()
-                    
-                    
+
+
                 }).ToList()
             };
 
@@ -317,7 +325,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
         public async Task<Result> AssignUser(AssignUserRequest assignUserRequest)
         {
-            var quiz = await _quizRepository.GetAll().Include(x=>x.Users).Where(x=>x.Name==assignUserRequest.QuizName).FirstOrDefaultAsync();
+            var quiz = await _quizRepository.GetAll().Include(x => x.Users).Where(x => x.Name == assignUserRequest.QuizName).FirstOrDefaultAsync();
             if (quiz == null)
             {
                 return Result.Failed("Quiz not found.");
@@ -332,7 +340,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
             //var x = quiz.Users.Where(x=>x.Id==user.Id).FirstOrDefault();
 
-            if (quiz.Users.Any(x=>x.Id==user.Id))
+            if (quiz.Users.Any(x => x.Id == user.Id))
             {
                 return Result.Failed("User is already assigned to this quiz.");
             }
@@ -374,10 +382,10 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             if (loggedUser is null) throw new Exception($"user {userName} cannot find");
 
             List<Quiz> quizes = await _quizRepository.GetAll()
-                .Include(x=>x.Users)
-                .Include(x=>x.Category)
-                .Include(x=>x.Author)
-                .Include(x=>x.Tags)
+                .Include(x => x.Users)
+                .Include(x => x.Category)
+                .Include(x => x.Author)
+                .Include(x => x.Tags)
                 .Include(x => x.Questions)
                 .ToListAsync();
 
@@ -385,7 +393,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             IEnumerable<Quiz> quizesAssignedToUser = quizes
                 .Where(x => (x.PublicAccess == true) || x.Users.Any(y => y.Id == loggedUser.Id))
                 .Where(x => x.IsActive)
-                .Where(x=>x.Questions.Any())
+                .Where(x => x.Questions.Any())
                 .ToList();
 
             IList<QuizListForUserResponse> quizesResponse = quizesAssignedToUser.Select(x => new QuizListForUserResponse
@@ -395,7 +403,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 Description = x.Description ?? "",
                 AuthorName = $"{x.Author.FirstName} {x.Author.LastName}",
                 CategoryName = x.Category.Name,
-                Tags = x.Tags.Select(y=>new TagResponse
+                Tags = x.Tags.Select(y => new TagResponse
                 {
                     Id = y.Id,
                     Name = y.Name,
@@ -417,7 +425,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 .Include(x => x.Category)
                 .Include(x => x.Author)
                 .Include(x => x.Tags)
-                .Where(x=>x.Category.Name.ToLower() == categoryName.ToLower())
+                .Where(x => x.Category.Name.ToLower() == categoryName.ToLower())
                 .ToListAsync();
 
             //add public quizes
@@ -492,10 +500,10 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 .Include(x => x.Category)
                 .Include(x => x.Author)
                 .Include(x => x.Tags)
-                .Include(x=>x.Questions)
-                .ThenInclude(x=>x.Answers)
-                .ThenInclude(x=>x.Attempts)
-                .Where(x=>x.AuthorId==loggedUser.Id)
+                .Include(x => x.Questions)
+                .ThenInclude(x => x.Answers)
+                .ThenInclude(x => x.Attempts)
+                .Where(x => x.AuthorId == loggedUser.Id)
                 .ToListAsync();
 
 
@@ -537,8 +545,8 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
                 .FirstOrDefaultAsync(x => x.UserName == userName);
 
             if (user is null) throw new ArgumentException($"user does not exist");
-            
-            var attemptCount = await _attemptCountRepository.GetAll().FirstOrDefaultAsync(x=>x.UserId == user.Id && x.QuizId == quiz.Id);
+
+            var attemptCount = await _attemptCountRepository.GetAll().FirstOrDefaultAsync(x => x.UserId == user.Id && x.QuizId == quiz.Id);
 
 
             QuizDetailsForUser quizDetails = new QuizDetailsForUser
@@ -621,6 +629,224 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
             return ResultWithModel<QuizDetailsForModResponse>.Ok(quizDetails);
 
+        }
+
+        public async Task<ResultWithModel<QuizGenerateResponse>> GenerateQuizAsync(QuizGenerateRequest quizToGenerate)
+        {
+            var token = _configuration.GetSection("ChatGPTApiSettings:Token").Value;
+
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var prompt = GeneratePrompt(quizToGenerate);
+                Console.WriteLine("Wygenerowany prompt: " + prompt);
+
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = new[]
+                    {
+                new { role = "system", content = "You are a helpful assistant." },
+                new { role = "user", content = prompt }
+            },
+                    max_tokens = 1500,
+                    temperature = 0.7
+                };
+
+                var response = await httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", requestBody);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<OpenAIResponse>();
+
+                    if (result != null && result.choices != null && result.choices.Count > 0)
+                    {
+                        var generatedQuiz = ParseOpenAIResponse(result);
+                        if (generatedQuiz != null)
+                        {
+                            return ResultWithModel<QuizGenerateResponse>.Ok(generatedQuiz);
+                        }
+                    }
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.Error.WriteLine("Błąd podczas zapytania do OpenAI: " + errorContent);
+            }
+
+            return ResultWithModel<QuizGenerateResponse>.Ok(new QuizGenerateResponse
+            {
+                Category = "NoCategory",
+                NumberOfQuestions = 0,
+                Questions = new List<GeneratedQuestion>()
+            });
+        }
+
+        private string GeneratePrompt(QuizGenerateRequest quizToGenerate)
+        {
+            return $@"
+Generate a quiz in the category {quizToGenerate.CategoryName} with {quizToGenerate.QuestionsAmount} questions. Each question should have {quizToGenerate.AnswersAmount} possible answers. Format the response as JSON in the following structure:
+{{
+  ""model"": {{
+    ""category"": ""{quizToGenerate.CategoryName}"",
+    ""numberOfQuestions"": {quizToGenerate.QuestionsAmount},
+    ""questions"": [
+      {{
+        ""questionText"": ""<questionText>"",
+        ""answers"": [
+          ""<answer1>"",
+          ""<answer2>"",
+          ""<answer3>"",
+          ""<answer4>""
+        ],
+        ""correctAnswer"": ""<correctAnswer>""
+      }}
+      // more questions...
+    ]
+  }},
+  ""isValid"": true,
+  ""errorMessage"": """"
+}}
+Make sure the JSON is properly formatted.";
+        }
+
+        private QuizGenerateResponse ParseOpenAIResponse(OpenAIResponse response)
+        {
+            try
+            {
+                var responseContent = response.choices[0].message.content.Trim();
+                Console.WriteLine("Odpowiedź OpenAI: " + responseContent);
+
+                // Niestandardowy deserializator
+                var jsonDocument = JsonDocument.Parse(responseContent);
+                var modelElement = jsonDocument.RootElement.GetProperty("model");
+
+                var category = modelElement.GetProperty("category").GetString();
+                var numberOfQuestions = modelElement.GetProperty("numberOfQuestions").GetInt32();
+
+                var questions = new List<GeneratedQuestion>();
+                foreach (var questionElement in modelElement.GetProperty("questions").EnumerateArray())
+                {
+                    var questionText = questionElement.GetProperty("questionText").GetString();
+                    var correctAnswer = questionElement.GetProperty("correctAnswer").GetString();
+
+                    var answers = new List<string>();
+                    foreach (var answerElement in questionElement.GetProperty("answers").EnumerateArray())
+                    {
+                        answers.Add(answerElement.GetString());
+                    }
+
+                    questions.Add(new GeneratedQuestion
+                    {
+                        QuestionText = questionText,
+                        Answers = answers,
+                        CorrectAnswer = correctAnswer
+                    });
+                }
+
+                return new QuizGenerateResponse
+                {
+                    Category = category,
+                    NumberOfQuestions = numberOfQuestions,
+                    Questions = questions
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Błąd podczas przetwarzania odpowiedzi OpenAI: " + ex.Message);
+                return new QuizGenerateResponse
+                {
+                    Category = "NoCategory",
+                    NumberOfQuestions = 0,
+                    Questions = new List<GeneratedQuestion>()
+                };
+            }
+        }
+
+
+
+
+        public class OpenAIResponse
+        {
+            public List<Choice> choices { get; set; }
+        }
+
+        public class Choice
+        {
+            public Message message { get; set; }
+        }
+
+        public class Message
+        {
+            public string role { get; set; }
+            public string content { get; set; }
+        }
+
+        public async Task<ResultWithModel<QuizOpenQuestionResponse>> EvaluateAnswer(QuizOpenQuestionRequest quizOpenQuestionRequest)
+        {
+            var token = _configuration.GetSection("ChatGPTApiSettings:Token").Value;
+
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var requestBody = new
+                {
+                    model = "gpt-3.5-turbo",
+                    messages = new[]
+                    {
+                        new { role = "system", content = "You are a helpful assistant." },
+                        new {
+                            role = "user",
+                            content = $@"Answer in polish. Evaluate the following answer for correctness and score it from 1 to 5. 
+Please return the evaluation in the following JSON format:
+{{
+    ""Score"": <score from 1 to 5>,
+    ""Description"": ""<short description explaining the evaluation>""
+}}
+Question: {quizOpenQuestionRequest.QuestionText}
+Answer: {quizOpenQuestionRequest.UserAnswer}"
+                        }
+                    },
+                    max_tokens = 1500,
+                    temperature = 0.7
+                };
+
+                var response = await httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", requestBody);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine(result);
+                    try
+                    {
+                        var openAiResponse = JsonSerializer.Deserialize<OpenAIResponse>(result);
+
+                        if (openAiResponse != null && openAiResponse.choices != null && openAiResponse.choices.Count > 0)
+                        {
+                            var content = openAiResponse.choices[0].message.content;
+                            var parsedResponse = JsonSerializer.Deserialize<QuizOpenQuestionResponse>(content);
+
+                            if (parsedResponse != null)
+                            {
+                                return ResultWithModel<QuizOpenQuestionResponse>.Ok(parsedResponse);
+                            }
+                        }
+
+                        return ResultWithModel<QuizOpenQuestionResponse>.Failed("Failed to parse the evaluation response.");
+                    }
+                    catch (JsonException jsonEx)
+                    {
+                        Console.Error.WriteLine("JSON Parsing Error: " + jsonEx.Message);
+                        Console.Error.WriteLine("Response Content: " + result);
+                        return ResultWithModel<QuizOpenQuestionResponse>.Failed("JSON Parsing Error: " + jsonEx.Message);
+                    }
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.Error.WriteLine("Błąd podczas zapytania do OpenAI: " + errorContent);
+                return ResultWithModel<QuizOpenQuestionResponse>.Failed("Request to OpenAI failed.");
+            }
         }
     }
 }

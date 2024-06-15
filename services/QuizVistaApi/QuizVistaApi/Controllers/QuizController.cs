@@ -138,5 +138,22 @@ namespace QuizVistaApi.Controllers
 
 
 
+        [HttpPost("generate")]
+        public async Task<ResultWithModel<QuizGenerateResponse>> GenerateQuiz([FromBody] QuizGenerateRequest quizGenerateRequest)
+        {
+            //var userId = User.FindFirst(ClaimTypes.Name)?.Value ?? "";
+
+            return await _quizService.GenerateQuizAsync(quizGenerateRequest);
+        }
+
+
+        [HttpPost("evaluateanswer")]
+        public async Task<ResultWithModel<QuizOpenQuestionResponse>> EvaluteAnswer([FromBody] QuizOpenQuestionRequest quizOpenQuestionRequest)
+        {
+            //var userId = User.FindFirst(ClaimTypes.Name)?.Value ?? "";
+
+            return await _quizService.EvaluateAnswer(quizOpenQuestionRequest);
+        }
+
     }
 }

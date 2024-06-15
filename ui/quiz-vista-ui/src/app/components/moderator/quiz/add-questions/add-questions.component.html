@@ -1,54 +1,86 @@
 <div class="container mt-4">
-    <section class="card" *ngIf="quizDetails">
-      <header class="card-header">
-        <h1>{{ quizDetails.name }}</h1>  <button class="btn btn-danger me-2 mb-4" (click)="deleteQuiz()">Usuń quiz</button>
-        <button class="btn btn-primary mb-4" (click)="generateQuiz()">Wygeneruj quiz</button>
-        <p>{{ quizDetails.description }}</p>
-      </header>
-    </section>
+  <section class="card mb-4" *ngIf="quizDetails">
+    <header class="card-header d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="card-title">{{ quizDetails.name }}</h1>
+        <p class="card-text">{{ quizDetails.description }}</p>
+      </div>
+      <div>
+        <button class="btn btn-danger me-2" (click)="deleteQuiz()">Usuń quiz</button>
+      </div>
+    </header>
+  </section>
 
-  <form class="container mt-4" #quizForm="ngForm">
-    <div *ngFor="let question of questions; let i = index" class="mb-4">
-      <div class="mb-3">
-        <img class="float-right" src="assets\icons\clear24.png" (click)="deleteQuestion(i); $event.preventDefault()">
-        <label for="questionText-{{i}}" class="form-label fw-bold">Pytanie {{i+1}}</label>
-        <input type="text" class="form-control" id="questionText-{{i}}" [(ngModel)]="question.text" name="questionText-{{i}}" required>
+  <form #quizForm="ngForm" class="mb-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">Generowanie Quizu</h5>
       </div>
-      <div class="row mb-3">
-        <div class="col">
-          <label for="additionalValue-{{i}}" class="form-label">Punkty za prawidłową odpowiedź</label>
-          <input type="number" class="form-control" id="additionalValue-{{i}}" [(ngModel)]="question.additionalValue" name="additionalValue-{{i}}" value="1">
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="category" class="form-label">Podaj temat quizu</label>
+          <input type="text" id="category" class="form-control" required [(ngModel)]="category" name="category" #categoryInput="ngModel">
         </div>
-        <div class="col">
-          <label for="substractionalValue-{{i}}" class="form-label">Punkty ujemne za nieprawidłową odpowiedź</label>
-          <input type="number" class="form-control" id="substractionalValue-{{i}}" [(ngModel)]="question.substractionalValue" name="substractionalValue-{{i}}">
+        <div class="mb-3">
+          <label for="questionsAmount" class="form-label">Liczba pytań</label>
+          <input type="number" id="questionsAmount" class="form-control" required [(ngModel)]="questionsAmount" name="questionsAmount" #questionsAmountInput="ngModel">
         </div>
-      </div>
-      <div class="mb-3">
-        <label for="questionType-{{i}}" class="form-label" (change)="editQuestion(question)">Typ pytania</label>
-        <select class="form-control" id="questionType-{{i}}" [(ngModel)]="question.type" name="questionType-{{i}}" (change)="onQuestionTypeChange(question, i)" required>
-          <option value="" disabled selected>Rodzaj pytania</option>
-          <option value="1">Jedna odpowiedź dobra</option>
-          <option value="2">Prawda/Fałsz</option>
-          <option value="3">Kilka odpowiedzi dobrych</option>
-        </select>
-      </div>
-      <div *ngFor="let answer of question.answers; let j = index" class="mb-2">
-        <img class="float-right" src="assets\icons\clear24.png" (click)="deleteAnswer(question,j)" *ngIf="questions[i].answers.length > 2">
-        <label for="answerText-{{i}}-{{j}}" class="form-label">Odpowiedź {{j + 1}}</label>
-        <input type="text" class="form-control" id="answerText-{{i}}-{{j}}" [(ngModel)]="answer.answerText" name="answerText-{{i}}-{{j}}" required>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="isCorrect-{{i}}-{{j}}" [(ngModel)]="answer.isCorrect" name="isCorrect-{{i}}-{{j}}" (change)="onAnswerChange(question, j)">
-          <label class="form-check-label" for="isCorrect-{{i}}-{{j}}">Prawidłowa odpowiedź</label>
+        <div class="mb-3">
+          <label for="answersAmount" class="form-label">Liczba odpowiedzi</label>
+          <input type="number" id="answersAmount" class="form-control" required [(ngModel)]="answersAmount" name="answersAmount" #answersAmountInput="ngModel">
         </div>
+        <button type="button" class="btn btn-primary" (click)="generateQuiz()" [disabled]="!quizForm.form.valid">Generuj Quiz</button>
       </div>
-      <button class="btn btn-outline-success mb-4" (click)="addAnswer(question)">Dodaj odpowiedź</button>
-      <hr />
+    </div>
+  </form>
+  
+
+  <form #questionsForm="ngForm">
+    <div *ngFor="let question of questions; let i = index" class="card mb-4">
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <label for="questionText-{{i}}" class="form-label fw-bold">Pytanie {{i+1}}</label>
+            <img class="float-right" src="assets/icons/clear24.png" (click)="deleteQuestion(i); $event.preventDefault()">
+          </div>
+          <input type="text" class="form-control" id="questionText-{{i}}" [(ngModel)]="question.text" name="questionText-{{i}}" required>
+        </div>
+        <div class="row mb-3">
+          <div class="col">
+            <label for="additionalValue-{{i}}" class="form-label">Punkty za prawidłową odpowiedź</label>
+            <input type="number" class="form-control" id="additionalValue-{{i}}" [(ngModel)]="question.additionalValue" name="additionalValue-{{i}}" value="1">
+          </div>
+          <div class="col">
+            <label for="substractionalValue-{{i}}" class="form-label">Punkty ujemne za nieprawidłową odpowiedź</label>
+            <input type="number" class="form-control" id="substractionalValue-{{i}}" [(ngModel)]="question.substractionalValue" name="substractionalValue-{{i}}">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="questionType-{{i}}" class="form-label">Typ pytania</label>
+          <select class="form-control" id="questionType-{{i}}" [(ngModel)]="question.type" name="questionType-{{i}}" (change)="onQuestionTypeChange(question, i)" required>
+            <option value="" disabled selected>Rodzaj pytania</option>
+            <option value="1">Jedna odpowiedź dobra</option>
+            <option value="2">Prawda/Fałsz</option>
+            <option value="3">Kilka odpowiedzi dobrych</option>
+          </select>
+        </div>
+        <div *ngFor="let answer of question.answers; let j = index" class="mb-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <label for="answerText-{{i}}-{{j}}" class="form-label">Odpowiedź {{j + 1}}</label>
+            <img class="float-right" src="assets/icons/clear24.png" (click)="deleteAnswer(question, j)" *ngIf="questions[i].answers.length > 2">
+          </div>
+          <input type="text" class="form-control" id="answerText-{{i}}-{{j}}" [(ngModel)]="answer.answerText" name="answerText-{{i}}-{{j}}" required>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="isCorrect-{{i}}-{{j}}" [(ngModel)]="answer.isCorrect" name="isCorrect-{{i}}-{{j}}" (change)="onAnswerChange(question, j)">
+            <label class="form-check-label" for="isCorrect-{{i}}-{{j}}">Prawidłowa odpowiedź</label>
+          </div>
+        </div>
+        <button class="btn btn-outline-success mt-3" (click)="addAnswer(question)">Dodaj odpowiedź</button>
+      </div>
     </div>
     <button class="btn btn-outline-success me-2 mb-4" (click)="addQuestion(); $event.preventDefault()">Dodaj pytanie</button>
     <div class="d-flex justify-content-start">
-        <button type="button" class="btn btn-primary mb-4" [disabled]="quizForm.invalid" [disabled]="!isFormValid()" (click)="onSubmit()">Zapisz</button>
+      <button type="button" class="btn btn-primary mb-4" [disabled]="!questionsForm.form.valid || !isFormValid()" (click)="onSubmit()">Zapisz</button>
     </div>
-    
   </form>
 </div>
