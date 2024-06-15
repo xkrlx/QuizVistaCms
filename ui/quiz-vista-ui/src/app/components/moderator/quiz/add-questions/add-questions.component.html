@@ -2,10 +2,25 @@
     <section class="card" *ngIf="quizDetails">
       <header class="card-header">
         <h1>{{ quizDetails.name }}</h1>  <button class="btn btn-danger me-2 mb-4" (click)="deleteQuiz()">Usuń quiz</button>
-        <button class="btn btn-primary mb-4" (click)="generateQuiz()">Wygeneruj quiz</button>
         <p>{{ quizDetails.description }}</p>
       </header>
     </section>
+
+    <form #quizForm="ngForm">
+      <div>
+        <label for="category">Category</label>
+        <input type="text" id="category" required [(ngModel)]="category" name="category" #categoryInput="ngModel">
+      </div>
+      <div>
+        <label for="questionsAmount">Questions Amount</label>
+        <input type="number" id="questionsAmount" required [(ngModel)]="questionsAmount" name="questionsAmount" #questionsAmountInput="ngModel">
+      </div>
+      <div>
+        <label for="answersAmount">Answers Amount</label>
+        <input type="number" id="answersAmount" required [(ngModel)]="answersAmount" name="answersAmount" #answersAmountInput="ngModel">
+      </div>
+      <button type="button" (click)="onSubmit()" [disabled]="!quizForm.form.valid">Submit</button>
+    </form>
 
   <form class="container mt-4" #quizForm="ngForm">
     <div *ngFor="let question of questions; let i = index" class="mb-4">

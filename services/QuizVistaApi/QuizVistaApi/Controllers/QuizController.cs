@@ -138,5 +138,14 @@ namespace QuizVistaApi.Controllers
 
 
 
+        [HttpPost("generate")]
+        public async Task<ResultWithModel<QuizGenerateResponse>> GenerateQuiz([FromBody] QuizGenerateRequest quizGenerateRequest)
+        {
+            //var userId = User.FindFirst(ClaimTypes.Name)?.Value ?? "";
+
+            return await _quizService.GenerateQuizAsync(quizGenerateRequest);
+        }
+
+
     }
 }

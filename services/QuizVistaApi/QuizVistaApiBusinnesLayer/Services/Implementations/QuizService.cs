@@ -1,6 +1,7 @@
 ﻿using Azure.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using QuizVistaApiBusinnesLayer.Extensions;
 using QuizVistaApiBusinnesLayer.Extensions.Mappings;
@@ -17,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace QuizVistaApiBusinnesLayer.Services.Implementations
@@ -29,12 +31,14 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
         private readonly IRepository<Attempt> _attemptRepository;
         private readonly IRepository<Answer> _answerRepository;
         private readonly IRepository<AttemptCount> _attemptCountRepository;
+        private readonly IConfiguration _configuration;
         public QuizService(IRepository<Quiz> quizRepository,
             IRepository<User> userRepository,
             IRepository<Tag> tagRepository,
             IRepository<Attempt> attemptRepository,
             IRepository<Answer> answerRepository,
-            IRepository<AttemptCount> attemptCountRepository)
+            IRepository<AttemptCount> attemptCountRepository,
+            IConfiguration configuration)
         {
             _quizRepository = quizRepository;
             _userRepository = userRepository;
@@ -42,6 +46,7 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
             _attemptRepository = attemptRepository;
             _answerRepository = answerRepository;
             _attemptCountRepository = attemptCountRepository;
+            _configuration = configuration;
         }
 
         public async Task<Result> CreateQuizAsync(string userId, QuizRequest quizToCreate)
@@ -621,6 +626,97 @@ namespace QuizVistaApiBusinnesLayer.Services.Implementations
 
             return ResultWithModel<QuizDetailsForModResponse>.Ok(quizDetails);
 
+        }
+
+        //Method to genereate quiz via ChatGPT API
+        public async Task<ResultWithModel<QuizGenerateResponse>> GenerateQuizAsync(QuizGenerateRequest quizToGenerate)
+        {
+            var token = _configuration.GetSection("ChatGPTApiSettings:Token").Value;
+            //  OpenAPI REQUEST
+
+            //HARDCODED DATA
+            var generatedQuiz = new QuizGenerateResponse
+            {
+                Category = "Animals",
+                NumberOfQuestions = 10,
+                Questions = new List<GeneratedQuestion>
+            {
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals is a mammal?",
+                        Answers = new List<string> { "Crocodile", "Whale", "Lizard", "Penguin" },
+                        CorrectAnswer = "Whale"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which animal is the largest in the world?",
+                        Answers = new List<string> { "African Elephant", "Blue Whale", "Whale Shark", "Polar Bear" },
+                        CorrectAnswer = "Blue Whale"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals is a bird?",
+                        Answers = new List<string> { "Orca", "Dolphin", "Pelican", "Koala" },
+                        CorrectAnswer = "Pelican"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals is venomous?",
+                        Answers = new List<string> { "Sea Turtle", "Tree Frog", "Scorpion", "Orangutan" },
+                        CorrectAnswer = "Scorpion"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals is the fastest on land?",
+                        Answers = new List<string> { "Cheetah", "Lion", "Antelope", "Zebra" },
+                        CorrectAnswer = "Cheetah"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals lives the longest?",
+                        Answers = new List<string> { "Parrot", "Giant Tortoise", "Rabbit", "Elephant" },
+                        CorrectAnswer = "Giant Tortoise"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals is an invertebrate?",
+                        Answers = new List<string> { "Jellyfish", "Penguin", "Shark", "Elephant" },
+                        CorrectAnswer = "Jellyfish"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals has the most teeth?",
+                        Answers = new List<string> { "Shark", "Crocodile", "Dolphin", "Hippopotamus" },
+                        CorrectAnswer = "Shark"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals is a predator?",
+                        Answers = new List<string> { "Koala", "Kangaroo", "Tiger", "Zebra" },
+                        CorrectAnswer = "Tiger"
+                    },
+                    new GeneratedQuestion
+                    {
+                        QuestionText = "Which of these animals can fly?",
+                        Answers = new List<string> { "Penguin", "Ostrich", "Sparrow", "Chicken" },
+                        CorrectAnswer = "Sparrow"
+                    }
+            }
+            };
+            // -------------
+
+            var jsonGenQuiz = JsonSerializer.Serialize(generatedQuiz);
+            var convertedGenQuiz = JsonSerializer.Deserialize<QuizGenerateResponse>(jsonGenQuiz);
+            if (convertedGenQuiz is null)
+            {
+                return ResultWithModel<QuizGenerateResponse>.Ok(new QuizGenerateResponse()
+                {
+                    Category = "NoCategory",
+                    NumberOfQuestions = 0,
+                    Questions = new List<GeneratedQuestion>()
+                });
+            }
+            return ResultWithModel<QuizGenerateResponse>.Ok(convertedGenQuiz);
         }
     }
 }

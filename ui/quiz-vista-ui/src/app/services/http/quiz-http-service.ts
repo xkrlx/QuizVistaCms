@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiConfig } from '../../config/api-config';
 import { Quiz } from 'src/app/models/quiz';
+import { GenQuiz } from 'src/app/models/genQuiz';
 
 @Injectable({
   providedIn: 'root'
@@ -44,6 +45,10 @@ export class QuizHttpService {
 
   createQuiz(quiz: Quiz): Observable<any>{
     return this.http.post(`${this.url}/create`,quiz);
+  }
+
+  generateQuiz(genQuiz: GenQuiz): Observable<any>{
+    return this.http.post(`${this.url}/generate`,genQuiz);
   }
 
   editQuiz(quiz: Quiz): Observable<any>{

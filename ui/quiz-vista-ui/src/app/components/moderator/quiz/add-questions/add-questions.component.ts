@@ -5,6 +5,7 @@ import { Answer } from 'src/app/models/answer';
 import { QuestionHttpService } from 'src/app/services/http/question-http-service';
 import { QuizHttpService } from 'src/app/services/http/quiz-http-service';
 import { AnswertHttpService } from 'src/app/services/http/answer-http.service';
+import { GenQuiz } from 'src/app/models/genQuiz';
 
 
 @Component({
@@ -21,6 +22,11 @@ export class AddQuestionsComponent {
   questionsToDelete: string[] = [];
   answersToDelete: string[]=[];
   newAnswers: Answer[]=[];
+
+  category: string = '';
+  questionsAmount: number = 0;
+  answersAmount: number = 0;
+
   quizData = [
     {
       pytanie: "pytanie1",
@@ -155,14 +161,12 @@ export class AddQuestionsComponent {
   }
   }
   
-
-  
-  
   getQuizDetails(quizName: string){
     this.quizHttpService.getQuizDetails(quizName).subscribe(res=>{
       this.quizDetails = res.model
     })
 }
+
 
 deleteQuiz(){
   if (this.quizDetails && this.quizDetails.id !== undefined) {
@@ -202,18 +206,14 @@ deleteAnswer(question: Question, answerIndex: number) {
   }
 }
 
-
-
-
-  editAnswer(question: Question, answer: Answer) {
+editAnswer(question: Question, answer: Answer) {
     if (question.id !== 0 && answer.id !== 0) {
       this.answerHttpService.editAnswer(answer).subscribe(
         response => console.log('Odpowiedź zaktualizowana:', response),
         error => console.error('Błąd podczas aktualizacji odpowiedzi:', error)
       );
     }
-  }
-
+}
 
 
 getQuestionsForQuiz(quizName: string) {
@@ -244,7 +244,6 @@ getQuestionsForQuiz(quizName: string) {
   });
 }
 
-
 onQuestionTypeChange(question: Question, index: number) {
   question.answers = [];
 
@@ -258,6 +257,7 @@ onQuestionTypeChange(question: Question, index: number) {
   }
 }
 
+
 isFormValid() {
   return this.questions.every(question =>
     question.text.trim() !== '' && 
@@ -267,6 +267,7 @@ isFormValid() {
     question.answers.every(answer => answer.answerText.trim() !== '') 
   );
 }
+
 onAnswerChange(question: Question, changedAnswerIndex: number) {
   if (question.type === '1' || question.type === '2') {
     question.answers.forEach((answer, index) => {
@@ -278,26 +279,31 @@ onAnswerChange(question: Question, changedAnswerIndex: number) {
 }
 
 generateQuiz(): void {
-  this.questions = this.quizData.map(q => ({
-    id: 0, // Domyślny id dla nowego pytania
-    quizId: 0, // Domyślny quizId, można dostosować w zależności od implementacji
-    text: q.pytanie,
-    type: '1', // Domyślny typ pytania (można dostosować)
-    cmsTitleStyle: '', // Domyślny styl tytułu CMS, można dostosować
-    cmsQuestionsStyle: '', // Domyślny styl pytań CMS, można dostosować
-    answers: Object.entries(q.odpowiedzi).map(([key, value]) => ({
-      id: 0, // Domyślny id dla nowej odpowiedzi
-      questionId: 0, // Domyślny questionId, można dostosować
-      answerText: value,
-      isCorrect: key === q.poprawnaOdpowiedz
-    })),
-    additionalValue: 1, // Można dostosować
-    substractionalValue: 0 // Można dostosować
-  }));
+  const genQuiz: GenQuiz = {
+    CategoryName: this.category,
+    QuestionsAmount: this.questionsAmount,
+    AnswersAmount: this.answersAmount
+  };
+
+  this.quizHttpService.generateQuiz(genQuiz);
+
+  // this.questions = this.quizData.map(q => ({
+  //   id: 0, // Domyślny id dla nowego pytania
+  //   quizId: 0, // Domyślny quizId, można dostosować w zależności od implementacji
+  //   text: q.pytanie,
+  //   type: '1', // Domyślny typ pytania (można dostosować)
+  //   cmsTitleStyle: '', // Domyślny styl tytułu CMS, można dostosować
+  //   cmsQuestionsStyle: '', // Domyślny styl pytań CMS, można dostosować
+  //   answers: Object.entries(q.odpowiedzi).map(([key, value]) => ({
+  //     id: 0, // Domyślny id dla nowej odpowiedzi
+  //     questionId: 0, // Domyślny questionId, można dostosować
+  //     answerText: value,
+  //     isCorrect: key === q.poprawnaOdpowiedz
+  //   })),
+  //   additionalValue: 1, // Można dostosować
+  //   substractionalValue: 0 // Można dostosować
+  // }));
 }
-
-
-
 
 
 }
